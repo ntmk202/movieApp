@@ -26,7 +26,7 @@ const initialState: TimeshowState = {
   getId: null,
 };
 
-const movieSlice = createSlice({
+const timeshowSlice = createSlice({
   name: 'showtimes',
   initialState,
   reducers: {
@@ -54,6 +54,6 @@ const movieSlice = createSlice({
   },
 });
 
-export const { getIdTimeshows } = movieSlice.actions;
-const movieReducer = movieSlice.reducer;
-export default movieReducer;
+export const { getIdTimeshows } = timeshowSlice.actions;
+const timeshowReducer = timeshowSlice.reducer;
+export default timeshowReducer;
