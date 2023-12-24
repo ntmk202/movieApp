@@ -13,7 +13,7 @@ export const getAllMovies = createAsyncThunk(
     }
   );
 
-  export const readIdMovies = createAsyncThunk(
+  export const getIdMovies = createAsyncThunk(
     "getIdMovies",
     async (movieId: String, thunkAPI) => {
       const response = await http.get<Movie[]>(`movies/${movieId}`,{

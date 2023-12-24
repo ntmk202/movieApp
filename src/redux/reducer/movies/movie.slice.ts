@@ -1,6 +1,6 @@
 import { AsyncThunk, createSlice, PayloadAction } from '@reduxjs/toolkit';
 import { Movie } from '~/src/utils/types/movie.type';
-import { getAllMovies } from './movieConstants';
+import { getAllMovies } from './movieAsyncs';
 
 type GenericAsyncThunk = AsyncThunk<unknown, unknown, any>
 
@@ -56,6 +56,7 @@ const movieSlice = createSlice({
       .addCase(getAllMovies.rejected, (state, action) => {
         state.loading = false;
         state.error = action.payload;
+        state.isSuccess = false;
       });
   },
 });

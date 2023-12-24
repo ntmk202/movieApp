@@ -23,7 +23,7 @@ import SubMovieCard from '../components/SubMovieCard';
 import MovieCard from '../components/MovieCard';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useSelector } from 'react-redux';
-import { getAllMovies } from '../redux/reducer/movies/movieConstants';
+import { getAllMovies } from '../redux/reducer/movies/movieAsyncs';
 import { RootState, useAppDispatch } from '../redux/store';
 
 const { width, height } = Dimensions.get('window');
