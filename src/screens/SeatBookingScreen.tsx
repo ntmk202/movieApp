@@ -48,33 +48,27 @@ const generateDate = () => {
 };
 
 const generateSeats = () => {
-  let numRow = 8;
-  let numColumn = 8;
-  let rowArray = [];
-  let start = 1;
-  let reachnine = false;
+  const numRow = 8;
+  const numColumn = 8;
+  const rowArray = [];
+  const start = 1;
+
+  const colLabels = Array.from({ length: numColumn }, (_, index) => (index + 1).toString());
+  const maxNumCol = Math.max(...colLabels.map(Number)); // Get the maximum number of columns
+  const rowLabels = Array.from({ length: numRow }, (_, rowIndex) => String.fromCharCode(65 + rowIndex));
 
   for (let i = 0; i < numRow; i++) {
-    let columnArray = [];
-    for (let j = 0; j < numColumn; j++) {
-      let seatObject = {
-        number: start,
-        taken: Boolean(Math.round(Math.random())),
+    const columnArray = [];
+    for (let j = 0; j < maxNumCol; j++) {
+      const seatObject = {
+        number: `${rowLabels[i]}-${colLabels[j]}`,
+        taken: false,
         selected: false,
       };
       columnArray.push(seatObject);
-      start++;
     }
-    // if (i == 3) {
-    //   numColumn += 2;
-    // }
-    // if (numColumn < 9 && !reachnine) {
-    //   numColumn += 2;
-    // } else {
-    //   reachnine = true;
-    //   numColumn -= 2;
-    // }
     rowArray.push(columnArray);
+    console.log(rowArray,columnArray)
   }
   return rowArray;
 };
@@ -83,7 +77,7 @@ const SeatBookingScreen = ({navigation, route}: any) => {
   const [dateArray, setDateArray] = useState<any[]>(generateDate());
   const [selectedDateIndex, setSelectedDateIndex] = useState<any>();
   const [price, setPrice] = useState<number>(0);
-  const [twoDSeatArray, setTwoDSeatArray] = useState<any[][]>(generateSeats());
+  const [twoDSeatArray, setTwoDSeatArray] = useState<any[number][]>(generateSeats());
   const [selectedSeatArray, setSelectedSeatArray] = useState([]);
   const [selectedTimeIndex, setSelectedTimeIndex] = useState<any>();
 
@@ -133,7 +127,7 @@ const SeatBookingScreen = ({navigation, route}: any) => {
         seatArray: selectedSeatArray,
         time: timeArray[selectedTimeIndex],
         date: dateArray[selectedDateIndex],
-        // ticketImage: route.params.PosterImage,
+        ticketImage: route.params.imageTicket,
       });
     } else {
       ToastAndroid.showWithGravity(
@@ -152,7 +146,7 @@ const SeatBookingScreen = ({navigation, route}: any) => {
       <StatusBar hidden />
       <View>
         <ImageBackground
-          source={{uri: route.params?.BgImage}}
+          source={{uri: route.params?.imageTicket}}
           style={styles.ImageBG}>
           <LinearGradient
             colors={[COLORS.BlackRGB10, COLORS.Black]}
@@ -174,7 +168,7 @@ const SeatBookingScreen = ({navigation, route}: any) => {
           {twoDSeatArray?.map((item, index) => {
             return (
               <View key={index} style={styles.seatRow}>
-                {item?.map((subitem, subindex) => {
+                {item?.map((subitem: any | null , subindex: number) => {
                   return (
                     <TouchableOpacity
                       key={subitem.number}
@@ -301,7 +295,7 @@ const styles = StyleSheet.create({
   },
   ImageBG: {
     width: '100%',
-    aspectRatio: 3072 / 1727,
+    aspectRatio: 2200 / 2000,
   },
   linearGradient: {
     height: '100%',

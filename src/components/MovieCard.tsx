@@ -1,5 +1,5 @@
 import React from 'react';
-import {Text, View, StyleSheet, TouchableOpacity, Image} from 'react-native';
+import { Text, View, StyleSheet, TouchableOpacity, Image } from 'react-native';
 import {
   BORDERRADIUS,
   COLORS,
@@ -40,22 +40,22 @@ const MovieCard = (props: any) => {
           styles.container,
           props.shoudlMarginatedAtEnd
             ? props.isFirst
-              ? {marginLeft: SPACING.space_36}
+              ? { marginLeft: SPACING.space_36 }
               : props.isLast
-              ? {marginRight: SPACING.space_36}
-              : {}
+                ? { marginRight: SPACING.space_36 }
+                : {}
             : {},
-          props.shouldMarginatedAround ? {margin: SPACING.space_12} : {},
-          {maxWidth: props.cardWidth},
+          props.shouldMarginatedAround ? { margin: SPACING.space_12 } : {},
+          { maxWidth: props.cardWidth },
         ]}>
         <Image
-          style={[styles.cardImage, {width: props.cardWidth}]}
-          source={{uri: props.imagePath}}
+          style={[styles.cardImage, { width: props.cardWidth }]}
+          source={{ uri: props.imagePath }}
         />
 
         <View>
           <View style={styles.rateContainer}>
-            <Image source={require('~/assets/icons/star.png')} style={{width: 16, height: 16}} />
+            <Image source={require('~/assets/icons/star.png')} style={{ width: 16, height: 16 }} />
             <Text style={styles.voteText}>
               {props.vote_average} ({props.vote_count})
             </Text>
@@ -66,10 +66,11 @@ const MovieCard = (props: any) => {
           </Text>
 
           <View style={styles.genreContainer}>
-            {props.genre.map((item: any) => {
+            {props.genre.split(',').map((item: any, index: string) => {
+              const trimmedGenre = item.trim(); // Trim spaces around the genre
               return (
-                <View key={item} style={styles.genreBox}>
-                  <Text style={styles.genreText}>{genres[item]}</Text>
+                <View key={index + 1} style={styles.genreBox}>
+                  <Text style={styles.genreText}>{trimmedGenre}</Text>
                 </View>
               );
             })}
@@ -86,7 +87,8 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: COLORS.BlackRGB10,
     borderRadius: BORDERRADIUS.radius_20,
-    paddingBottom: 15
+    paddingBottom: 10,
+    marginEnd: 10
   },
   cardImage: {
     aspectRatio: 2 / 3,
@@ -119,7 +121,7 @@ const styles = StyleSheet.create({
   genreContainer: {
     flex: 1,
     flexDirection: 'row',
-    gap: SPACING.space_20,
+    gap: SPACING.space_10,
     flexWrap: 'wrap',
     justifyContent: 'center',
   },

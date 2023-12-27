@@ -25,6 +25,7 @@ import { LinearGradient } from 'expo-linear-gradient';
 import { useSelector } from 'react-redux';
 import { getAllMovies } from '../redux/reducer/movies/movieAsyncs';
 import { RootState, useAppDispatch } from '../redux/store';
+import { getIdMovie } from '../redux/reducer/movies/movie.slice';
 
 const { width, height } = Dimensions.get('window');
 
@@ -63,21 +64,19 @@ const HomeScreen = ({ navigation }: any) => {
   )
   // console.log(movieList)
 
-  // const [nowPlayingMoviesList, setNowPlayingMoviesList] = useState<any>(movieList);
+  const [nowPlayingMoviesList, setNowPlayingMoviesList] = useState<any>(undefined);
   const [popularMoviesList, setPopularMoviesList] = useState<any>(undefined);
   const [upcomingMoviesList, setUpcomingMoviesList] = useState<any>(undefined);
 
 
-  console.log(movieList)
+  // console.log(movieList)
 
   useEffect(() => {
     const promise = dispatch(getAllMovies());
 
     (async () => {
         // let tempNowPlaying = await getNowPlayingMoviesList();
-        // setNowPlayingMoviesList([
-        //   movieList
-        // ]);
+        // setNowPlayingMoviesList([movieList]);
 
         let tempPopular = await getPopularMoviesList();
         setPopularMoviesList(tempPopular.results);
@@ -92,6 +91,12 @@ const HomeScreen = ({ navigation }: any) => {
 
   const searchMoviesFunction = () => {
     navigation.navigate('Search');
+  };
+
+  const handleMovieCardPress = (movieId: string) => {
+    dispatch(getIdMovie(movieId));
+    // Navigate to the MovieDetails screen and pass the movieId as a parameter
+    navigation.push('MovieDetails', { movieId });
   };
 
   if (
@@ -154,15 +159,13 @@ const HomeScreen = ({ navigation }: any) => {
             return (
               <MovieCard
                 shoudlMarginatedAtEnd={true}
-                cardFunction={() => {
-                  navigation.push('MovieDetails', { movieid: item.id });
-                }}
+                cardFunction={() => {handleMovieCardPress(item.id)}}
                 cardWidth={width * 0.7}
                 isFirst={index == 0 ? true : false}
                 isLast={index == upcomingMoviesList?.length - 1 ? true : false}
                 title={item.title}
                 imagePath={item.posterImage}
-                genre={item.genre.slice(1, 4)}
+                genre={item.genre}
                 vote_average={item.rating}
                 vote_count={item.views}
               />

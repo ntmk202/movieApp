@@ -16,7 +16,7 @@ interface MovieState {
   loading: boolean;
   error: null | any;
   getIdMovie: Movie | null;
-  getTitleMovie: Movie | null;
+  getTitleMovie: Movie |null ;
 }
 const initialState: MovieState = {
   movieList: [],

@@ -50,6 +50,7 @@ const styles = StyleSheet.create({
     // fontFamily: FONTFAMILY.medium,
     fontSize: FONTSIZE.size_12,
     color: COLORS.White,
+    marginVertical: 4
   },
   subtitle: {
     alignSelf: 'stretch',

@@ -26,11 +26,11 @@ import { store } from './src/redux/store';
 
 const App = () => {
     return(
-        <React.StrictMode>
+        // <React.StrictMode>
             <Provider store={store}>
                 <Index/>
             </Provider>
-        </React.StrictMode>
+        // </React.StrictMode>
     )
 }
 

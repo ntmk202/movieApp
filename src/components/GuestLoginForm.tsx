@@ -9,9 +9,10 @@ const GuestLoginForm = (props: any) => {
       <TextInput 
         style = {styles.textInput}
         returnKeyType="next" 
-        placeholder="Enter your fullname"
+        placeholder="Fullname"
         placeholderTextColor={COLORS.WhiteRGBA32}
-        // value='Email' 
+        onChangeText={props.onChangeTextFullname}
+        // value = {props.fullname}
         autoComplete='name-given' 
         textContentType='givenName' 
         keyboardType='default' 
@@ -19,9 +20,10 @@ const GuestLoginForm = (props: any) => {
       <TextInput 
         style = {styles.textInput}
         returnKeyType="next" 
-        placeholder="Enter your email"
+        placeholder="Email"
         placeholderTextColor={COLORS.WhiteRGBA32}
-        // value='Email' 
+        onChangeText={props.onChangeTextEmail}
+        // value={props.email}
         autoCapitalize='none' 
         autoComplete='email' 
         textContentType='emailAddress' 
@@ -30,16 +32,17 @@ const GuestLoginForm = (props: any) => {
       <TextInput 
         style = {styles.textInput}
         returnKeyType="done" 
-        placeholder="Enter your number"
+        placeholder="Number"
         placeholderTextColor={COLORS.WhiteRGBA32}
-        // value='Email' 
+        onChangeText={props.onChangeTextNumber}
+        // value={props.number}
         autoCapitalize='none' 
         autoComplete='cc-number' 
         textContentType='telephoneNumber' 
         keyboardType='number-pad' 
       />
       {/* <Button title='Login now' color={COLORS.Orange} onPress={LoginAction}/> */}
-      <TouchableOpacity style={styles.btn} onPress={props.action} >
+      <TouchableOpacity style={styles.btn} onPress={props.onPress} >
         <Text style={{color: COLORS.White, fontSize: FONTSIZE.size_18, fontWeight: '600' }}>Continue</Text>
       </TouchableOpacity>
     </View>

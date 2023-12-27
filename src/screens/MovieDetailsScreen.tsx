@@ -11,7 +11,6 @@ import {
   FlatList,
   TouchableOpacity,
 } from 'react-native';
-import { baseImagePath, movieCastDetails, movieDetails } from '../api/apicalls';
 import {
   BORDERRADIUS,
   COLORS,
@@ -23,51 +22,17 @@ import AppHeader from '../components/AppHeader';
 import { LinearGradient } from 'expo-linear-gradient';
 import CategoryHeader from '../components/CategoryHeader';
 import CastCard from '../components/CastCard';
+import { useSelector } from 'react-redux';
+import { RootState } from '../redux/store';
 
-const getMovieDetails = async (movieid: number) => {
-  try {
-    let response = await fetch(movieDetails(movieid));
-    let json = await response.json();
-    return json;
-  } catch (error) {
-    console.error('Something Went wrong in getMoviesDetails Function', error);
-  }
-};
-
-const getMovieCastDetails = async (movieid: number) => {
-  try {
-    let response = await fetch(movieCastDetails(movieid));
-    let json = await response.json();
-    return json;
-  } catch (error) {
-    console.error(
-      'Something Went wrong in getMovieCastDetails Function',
-      error,
-    );
-  }
-};
-
-const MovieDetailsScreen = ({ navigation, route }: any) => {
-  const [movieData, setMovieData] = useState<any>(undefined);
-  const [movieCastData, setmovieCastData] = useState<any>(undefined);
-
-  useEffect(() => {
-    (async () => {
-      const tempMovieData = await getMovieDetails(route.params.movieid);
-      setMovieData(tempMovieData);
-    })();
-
-    (async () => {
-      const tempMovieCastData = await getMovieCastDetails(route.params.movieid);
-      setmovieCastData(tempMovieCastData.cast);
-    })();
-  }, []);
+const MovieDetailsScreen = ({ navigation }: any) => {
+  const { getIdMovie, loading, isSuccess, error } = useSelector(
+    (state: RootState) => state.movies
+  )
 
   if (
-    movieData == undefined &&
-    movieData == null &&
-    movieCastData == undefined &&
-    movieCastData == null
+    getIdMovie == undefined &&
+    getIdMovie == null
   ) {
     return (
       <ScrollView
@@ -99,7 +64,7 @@ const MovieDetailsScreen = ({ navigation, route }: any) => {
         <View>
           <ImageBackground
             source={{
-              uri: baseImagePath('w780', movieData?.backdrop_path),
+              uri: getIdMovie?.posterImage,
             }}
             style={styles.imageBG}>
             <LinearGradient
@@ -116,7 +81,7 @@ const MovieDetailsScreen = ({ navigation, route }: any) => {
           </ImageBackground>
           <View style={styles.imageBG}></View>
           <Image
-            source={{ uri: baseImagePath('w342', movieData?.poster_path) }}
+            source={{ uri: getIdMovie?.posterImage }}
             style={styles.cardImage}
           />
         </View>
@@ -124,46 +89,42 @@ const MovieDetailsScreen = ({ navigation, route }: any) => {
         <View style={styles.timeContainer}>
           <Image source={require('~/assets/icons/clock-circular-outline.png')} style={{ width: 20, height: 20, marginEnd: 10 }} />
           <Text style={styles.runtimeText}>
-            {Math.floor(movieData?.runtime / 60)}h{' '}
-            {Math.floor(movieData?.runtime % 60)}m
+            {Math.floor(getIdMovie?.durationInMinutes / 60)}h{' : '}
+            {Math.floor(getIdMovie?.durationInMinutes % 60)}m
           </Text>
         </View>
 
         <View>
-          <Text style={styles.title}>{movieData?.original_title}</Text>
+          <Text style={styles.title}>{getIdMovie?.title}</Text>
           <View style={styles.genreContainer}>
-            {movieData?.genres.map((item: any) => {
+            {getIdMovie.genre.split(',').map((item: any, index: number) => {
+              const trimmedGenre = item.trim(); // Trim spaces around the genre
               return (
-                <View style={styles.genreBox} key={item.id}>
-                  <Text style={styles.genreText}>{item.name}</Text>
+                <View key={index + 1} style={styles.genreBox}>
+                  <Text style={styles.genreText}>{trimmedGenre}</Text>
                 </View>
               );
             })}
           </View>
-          <Text style={styles.tagline}>{movieData?.tagline}</Text>
+          <Text style={styles.tagline}>{getIdMovie?.tagline}</Text>
         </View>
 
         <View style={styles.infoContainer}>
           <View style={styles.rateContainer}>
             <Image source={require('~/assets/icons/star.png')} style={{ width: 20, height: 20 }} />
             <Text style={styles.runtimeText}>
-              {movieData?.vote_average.toFixed(1)} ({movieData?.vote_count})
+              {getIdMovie?.rating} ({getIdMovie?.views})
             </Text>
-            <Text style={styles.runtimeText}>
-              {movieData?.release_date.substring(8, 10)}{' '}
-              {new Date(movieData?.release_date).toLocaleString('default', {
-                month: 'long',
-              })}{' '}
-              {movieData?.release_date.substring(0, 4)}
+            <Text style={styles.runtimeText}>{getIdMovie?.release_date}
             </Text>
           </View>
-          <Text style={styles.descriptionText}>{movieData?.overview}</Text>
+          <Text style={styles.descriptionText}>{getIdMovie?.description}</Text>
         </View>
 
         <View>
           <CategoryHeader title="Top Cast" />
           <FlatList
-            data={movieCastData}
+            data={getIdMovie.actors}
             keyExtractor={(item: any) => item.id}
             horizontal
             contentContainerStyle={styles.containerGap24}
@@ -171,10 +132,10 @@ const MovieDetailsScreen = ({ navigation, route }: any) => {
               <CastCard
                 shouldMarginatedAtEnd={true}
                 cardWidth={80}
-                isFirst={index == 0 ? true : false}
-                isLast={index == movieCastData?.length - 1 ? true : false}
-                imagePath={baseImagePath('w185', item.profile_path)}
-                title={item.original_name}
+                isFirst={index == 0}
+                isLast={index == getIdMovie.actors?.length - 1}
+                imagePath={item.image}
+                title={item.name}
                 subtitle={item.character}
               />
             )}
@@ -184,18 +145,17 @@ const MovieDetailsScreen = ({ navigation, route }: any) => {
       </ScrollView>
       <View style={styles.buyTicket}>
         <TouchableOpacity style={styles.buttonBG}>
-          <Text style={[styles.buttonText,{backgroundColor: COLORS.Grey}]}>See Comment</Text>
+          <Text style={[styles.buttonText, { backgroundColor: COLORS.Grey }]}>See Comment</Text>
         </TouchableOpacity>
         <TouchableOpacity
           style={styles.buttonBG}
           onPress={() => {
-            // navigation.push('SeatBooking', {
-            //   BgImage: baseImagePath('w780', movieData.backdrop_path),
-            //   PosterImage: baseImagePath('original', movieData.poster_path),
-            // });
-            navigation.navigate('Login')
+            navigation.push('Login', {
+              imagePoster: getIdMovie?.posterImage
+            });
+            // navigation.navigate('Login')
           }}>
-          <Text style={[styles.buttonText,{paddingHorizontal: 70}]}>Buy Ticket</Text>
+          <Text style={[styles.buttonText, { paddingHorizontal: 70 }]}>Buy Ticket</Text>
         </TouchableOpacity>
       </View>
     </View>
@@ -217,11 +177,11 @@ const styles = StyleSheet.create({
   scrollViewContainer: {
     flex: 1,
   },
-  buyTicket: { 
-    position: 'absolute', 
-    bottom: 0, 
-    backgroundColor: COLORS.Black, 
-    width: '100%' ,
+  buyTicket: {
+    position: 'absolute',
+    bottom: 0,
+    backgroundColor: COLORS.Black,
+    width: '100%',
     flexDirection: 'row',
     justifyContent: 'space-around'
   },
@@ -271,7 +231,7 @@ const styles = StyleSheet.create({
   genreContainer: {
     flex: 1,
     flexDirection: 'row',
-    gap: SPACING.space_20,
+    gap: SPACING.space_10,
     flexWrap: 'wrap',
     justifyContent: 'center',
   },
