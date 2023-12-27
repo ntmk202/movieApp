@@ -150,9 +150,7 @@ const MovieDetailsScreen = ({ navigation }: any) => {
         <TouchableOpacity
           style={styles.buttonBG}
           onPress={() => {
-            navigation.push('Login', {
-              imagePoster: getIdMovie?.posterImage
-            });
+            navigation.push('Login');
             // navigation.navigate('Login')
           }}>
           <Text style={[styles.buttonText, { paddingHorizontal: 70 }]}>Buy Ticket</Text>

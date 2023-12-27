@@ -42,7 +42,8 @@ const GuestLogin = ({ navigation, route }: any) => {
         guestName: guestFullname,
         email: guestEmail,
         phoneNumber: guestNumber,
-        imageTicket: getIdMovie?.posterImage
+        imageTicket: getIdMovie?.posterImage,
+        idMovie: getIdMovie?.id
       });
     } else {
       ToastAndroid.showWithGravity(
