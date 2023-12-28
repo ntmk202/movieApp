@@ -28,25 +28,10 @@ const CustomTabBtn = ({ children, onPress }: any) => (
 const TabNavigator = () => {
 
   const dispatch = useDispatch()
-  const { auth, token } = useSelector(
+  const { auth } = useSelector(
     (state: RootState) => state.user
   )
 
-  // const logAllDataInAsyncStorage = async () => {
-  //   await AsyncStorage.setItem('test', 'test');
-  //   await AsyncStorage.clear()
-  //   try {
-  //     const allKeys = await AsyncStorage.getAllKeys();
-  //     const allData = await AsyncStorage.multiGet(allKeys);
-
-  //     console.log('All keys:', allKeys);
-  //     console.log('All data:', allData);
-  //   } catch (error) {
-  //     console.error('Error logging data in AsyncStorage:', error);
-  //   }
-  // };
-
-  // logAllDataInAsyncStorage()
   const ProfileTabComponent = auth ? UserAccountScreen : RequireLoginScreen;
   const ChatBotTabComponent = auth ? ChatbotScreen : RequireLoginScreen;
 

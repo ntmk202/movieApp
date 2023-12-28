@@ -8,7 +8,7 @@ export const getAllMovies = createAsyncThunk(
       const response = await http.get<Movie[]>('movies',{
         signal: thunkAPI.signal
       })
-      // console.log(response.data);
+  
       return response.data
     }
   );
@@ -19,7 +19,7 @@ export const getAllMovies = createAsyncThunk(
       const response = await http.get<Movie[]>(`movies/${movieId}`,{
         signal: thunkAPI.signal
       })
-      // console.log(response.data);
+      
       return response.data
     }
   );

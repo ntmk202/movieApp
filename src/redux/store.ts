@@ -34,7 +34,7 @@ const userPersistConfig = {
     key: 'user',
     storage: AsyncStorage,
     blacklist: ['loading', 'error', 'data', 'dataLogin'],
-    whitelist: ['token',  'auth'],
+    whitelist: ['token',  'auth', 'fullname', 'dataUser'],
   };
   
   const persistedUserReducer = persistReducer(userPersistConfig, userReducer);

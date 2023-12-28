@@ -28,7 +28,6 @@ const RegisterFrom = (props : any) => {
   const { data, loading, error } = useSelector(
     (state: RootState) => state.user
   )
-  console.log(data)
 
   const dispatch = useAppDispatch()
   const navigation = useNavigation<any>()
