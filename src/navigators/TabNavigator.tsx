@@ -1,26 +1,55 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import HomeScreen from '../screens/HomeScreen';
 import SearchScreen from '../screens/SearchScreen';
 import TicketScreen from '../screens/TicketScreen';
 import UserAccountScreen from '../screens/UserAccountScreen';
-import {COLORS, FONTSIZE, SPACING} from '../theme/theme';
+import { COLORS, FONTSIZE, SPACING } from '../theme/theme';
 // import CustomIcon from '../components/CustomIcon';
-import {View, StyleSheet, TouchableOpacity, Image} from 'react-native';
-import {createBottomTabNavigator} from '@react-navigation/bottom-tabs';
+import { View, StyleSheet, TouchableOpacity, Image } from 'react-native';
+import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import CustomIcon from '../components/CustomIcon';
 import ChatbotScreen from '../screens/ChatbotScreen';
+import { useDispatch, useSelector } from 'react-redux';
+import { RootState } from '../redux/store';
+import RequireLoginScreen from '../screens/RequireLoginScreen';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import { setToken } from '../redux/reducer/users/userSlice';
 
 const Tab = createBottomTabNavigator();
 
-const CustomTabBtn = ({children, onPress} : any) => (
+const CustomTabBtn = ({ children, onPress }: any) => (
   <TouchableOpacity style={styles.customTab} onPress={onPress}>
-    <View style={{width: 60, height: 60, borderRadius: 35, backgroundColor: COLORS.Orange}}>
+    <View style={{ width: 60, height: 60, borderRadius: 35, backgroundColor: COLORS.Orange }}>
       {children}
     </View>
   </TouchableOpacity>
 )
 
 const TabNavigator = () => {
+
+  const dispatch = useDispatch()
+  const { auth, token } = useSelector(
+    (state: RootState) => state.user
+  )
+
+  // const logAllDataInAsyncStorage = async () => {
+  //   await AsyncStorage.setItem('test', 'test');
+  //   await AsyncStorage.clear()
+  //   try {
+  //     const allKeys = await AsyncStorage.getAllKeys();
+  //     const allData = await AsyncStorage.multiGet(allKeys);
+
+  //     console.log('All keys:', allKeys);
+  //     console.log('All data:', allData);
+  //   } catch (error) {
+  //     console.error('Error logging data in AsyncStorage:', error);
+  //   }
+  // };
+
+  // logAllDataInAsyncStorage()
+  const ProfileTabComponent = auth ? UserAccountScreen : RequireLoginScreen;
+  const ChatBotTabComponent = auth ? ChatbotScreen : RequireLoginScreen;
+
   return (
     <Tab.Navigator
       screenOptions={{
@@ -39,12 +68,12 @@ const TabNavigator = () => {
         component={HomeScreen}
         options={{
           tabBarShowLabel: false,
-          tabBarIcon: ({focused}) => {
+          tabBarIcon: ({ focused }) => {
             return (
               <View
                 style={[
                   styles.activeTabBackground,
-                  focused ? {backgroundColor: COLORS.Orange} : {},
+                  focused ? { backgroundColor: COLORS.Orange } : {},
                 ]}>
                 <CustomIcon name={require('~/assets/icons/home.png')} />
               </View>
@@ -57,12 +86,12 @@ const TabNavigator = () => {
         component={SearchScreen}
         options={{
           tabBarShowLabel: false,
-          tabBarIcon: ({focused}) => {
+          tabBarIcon: ({ focused }) => {
             return (
               <View
                 style={[
                   styles.activeTabBackground,
-                  focused ? {backgroundColor: COLORS.Orange} : {},
+                  focused ? { backgroundColor: COLORS.Orange } : {},
                 ]}>
                 <CustomIcon name={require('~/assets/icons/search.png')} />
               </View>
@@ -70,12 +99,12 @@ const TabNavigator = () => {
           },
         }}
       />
-      <Tab.Screen name='Chatbot' component={ChatbotScreen} 
+      <Tab.Screen name='Chatbot' component={ChatBotTabComponent}
         options={{
           tabBarShowLabel: false,
-          tabBarIcon: ({focused}) => {
+          tabBarIcon: ({ focused }) => {
             return (
-              <Image source={require('~/assets/icons/movie-reel.png')} style={[focused?{tintColor: COLORS.Yellow}: {}]} />
+              <Image source={require('~/assets/icons/movie-reel.png')} style={[focused ? { tintColor: COLORS.Yellow } : {}]} />
             );
           },
           tabBarButton: (props) => (
@@ -88,12 +117,12 @@ const TabNavigator = () => {
         component={TicketScreen}
         options={{
           tabBarShowLabel: false,
-          tabBarIcon: ({focused}) => {
+          tabBarIcon: ({ focused }) => {
             return (
               <View
                 style={[
                   styles.activeTabBackground,
-                  focused ? {backgroundColor: COLORS.Orange} : {},
+                  focused ? { backgroundColor: COLORS.Orange } : {},
                 ]}>
                 <CustomIcon name={require('~/assets/icons/ticket.png')} />
               </View>
@@ -103,15 +132,15 @@ const TabNavigator = () => {
       />
       <Tab.Screen
         name="User"
-        component={UserAccountScreen}
+        component={ProfileTabComponent}
         options={{
           tabBarShowLabel: false,
-          tabBarIcon: ({focused}) => {
+          tabBarIcon: ({ focused }) => {
             return (
               <View
                 style={[
                   styles.activeTabBackground,
-                  focused ? {backgroundColor: COLORS.Orange} : {},
+                  focused ? { backgroundColor: COLORS.Orange } : {},
                 ]}>
                 <CustomIcon name={require('~/assets/icons/user.png')} />
               </View>
@@ -133,7 +162,7 @@ const styles = StyleSheet.create({
     top: -20,
     justifyContent: 'center',
     alignItems: 'center',
-    shadowOffset: {width: 5, height: 5},
+    shadowOffset: { width: 5, height: 5 },
     shadowOpacity: 0.26,
     shadowRadius: 7,
     elevation: 5,

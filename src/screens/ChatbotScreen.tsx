@@ -7,6 +7,8 @@ import { Bubble, Day, GiftedChat, MessageText, Time } from 'react-native-gifted-
 import { Dialogflow_V2 } from 'react-native-dialogflow'
 import { dialogflowConfig } from '../../env'
 import SubMovieCard from '../components/SubMovieCard'
+import { useSelector } from 'react-redux'
+import { RootState } from '../redux/store'
 
 
 interface ChatbotScreenState {
@@ -41,6 +43,7 @@ const BOT = {
 }
 
 class ChatbotScreen extends Component<{}, ChatbotScreenState> {
+
   state = {
     messages: [
       {

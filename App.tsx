@@ -1,7 +1,9 @@
 import { Provider } from 'react-redux';
 import Index from './src/index';
 import React from 'react';
-import { store } from './src/redux/store';
+import { persistor, store } from './src/redux/store';
+import { PersistGate } from 'redux-persist/integration/react';
+
 // import { AppRegistry } from 'react-native';
 // import * as Font from 'expo-font';
 
@@ -18,18 +20,20 @@ import { store } from './src/redux/store';
 //         'monserrat_thin': require('./assets/fonts/montserrat/Montserrat-Thin.ttf'),
 //     });
 //   };
-  
+
 //   loadFonts().then(() => {
 //     AppRegistry.registerComponent('MyApp', () => App);
 //     AppRegistry.runApplication('MyApp', { rootTag: document.getElementById('app-root') });
 //   });
 
 const App = () => {
-    return(
+    return (
         // <React.StrictMode>
+        <PersistGate loading={null} persistor={persistor}>
             <Provider store={store}>
-                <Index/>
+                <Index />
             </Provider>
+        </PersistGate>
         // </React.StrictMode>
     )
 }

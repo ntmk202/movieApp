@@ -26,6 +26,13 @@ import { useSelector } from 'react-redux';
 import { RootState } from '../redux/store';
 
 const MovieDetailsScreen = ({ navigation }: any) => {
+
+  const { auth } = useSelector(
+    (state: RootState) => state.user
+  )
+
+  const authNavigation = auth ? 'SeatBooking' : 'Login';
+
   const { getIdMovie, loading, isSuccess, error } = useSelector(
     (state: RootState) => state.movies
   )
@@ -150,7 +157,7 @@ const MovieDetailsScreen = ({ navigation }: any) => {
         <TouchableOpacity
           style={styles.buttonBG}
           onPress={() => {
-            navigation.navigate('Login');
+            navigation.navigate(authNavigation);
           }}>
           <Text style={[styles.buttonText, { paddingHorizontal: 70 }]}>Buy Ticket</Text>
         </TouchableOpacity>

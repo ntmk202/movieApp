@@ -1,14 +1,40 @@
 import * as React from 'react';
-import {Text, View, StyleSheet, StatusBar, Image, ScrollView} from 'react-native';
-import {COLORS, FONTFAMILY, FONTSIZE, SPACING} from '../theme/theme';
+import { Text, View, StyleSheet, StatusBar, Image, ScrollView, TouchableOpacity } from 'react-native';
+import { COLORS, FONTSIZE, SPACING } from '../theme/theme';
 import AppHeader from '../components/AppHeader';
 import SettingComponent from '../components/SettingComponent';
 import { LinearGradient } from 'expo-linear-gradient';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import { useNavigation } from '@react-navigation/native';
+import { setToken } from '../redux/reducer/users/userSlice'; // Import the setToken action
+import { useDispatch } from 'react-redux';
+import { useEffect } from 'react';
+import { CommonActions } from '@react-navigation/native'; // Import CommonActions
+import { logOutUser } from '../redux/reducer/users/userAsync';
+import { useAppDispatch } from '../redux/store';
+
 // import close from '~/assets/icons/close.png'
 
-const UserAccountScreen = ({navigation}: any) => {
+const UserAccountScreen = ({ navigation }: any) => {
+
+  const dispatch = useAppDispatch()
+
+  const logOut = async () => {
+    dispatch(logOutUser())
+    navigation.dispatch(
+          CommonActions.reset({
+            index: 0,
+            routes: [
+              { name: 'Tab' }, 
+            ],
+          })
+        );
+  };
+
+  
+
   return (
-    <LinearGradient style={{flex:1}} colors={[COLORS.Black,COLORS.DarkGrey, COLORS.DarkGrey]}>
+    <LinearGradient style={{ flex: 1 }} colors={[COLORS.Black, COLORS.DarkGrey, COLORS.DarkGrey]}>
       <View style={styles.container}>
         <StatusBar hidden />
         <View style={styles.appHeaderContainer}>
@@ -55,6 +81,9 @@ const UserAccountScreen = ({navigation}: any) => {
               subtitle="more"
             />
           </View>
+          <TouchableOpacity style={styles.btn} onPress={logOut}>
+            <Text style={{ color: COLORS.White, fontSize: FONTSIZE.size_18, fontWeight: '600' }}>Log out</Text>
+          </TouchableOpacity>
         </ScrollView>
       </View>
     </LinearGradient>
@@ -86,6 +115,19 @@ const styles = StyleSheet.create({
     marginTop: SPACING.space_16,
     color: COLORS.White,
   },
+  btn: {
+    backgroundColor: COLORS.Orange,
+    padding: 10,
+    justifyContent: "center",
+    alignItems: "center",
+    borderRadius: 10,
+    shadowOffset: { width: -2, height: 2 },
+    shadowOpacity: 0.9,
+    elevation: 10,
+    shadowRadius: 10,
+    shadowColor: "#000",
+    marginVertical: 20,
+  }
 });
 
 export default UserAccountScreen;
