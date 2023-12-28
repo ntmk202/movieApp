@@ -54,7 +54,7 @@ const RegisterFrom = (props : any) => {
       return;
     }
     dispatch(registerUser({fullname, email, number, password,dateBirth, address, profile_pic}));
-    navigation.navigate("Login")
+    navigation.goBack()
   }
 
 

@@ -4,6 +4,9 @@ import { SafeAreaView } from 'react-native-safe-area-context'
 import AppHeader from '../components/AppHeader'
 import { COLORS, FONTSIZE, SPACING } from '../theme/theme'
 import { LinearGradient } from 'expo-linear-gradient'
+import { RootState, useAppDispatch } from '../redux/store'
+import { useSelector } from 'react-redux'
+import { createPayPalOrder } from '../redux/reducer/booking/bookingAsyncs'
 
 const PaymentScreen = ({ navigation, route }: any) => {
 
@@ -13,6 +16,17 @@ const PaymentScreen = ({ navigation, route }: any) => {
   const handleRadioPress = () => {
     setRadio(!radio); // Toggle the state of the radio button
   };
+
+  const dispatch = useAppDispatch();
+  const {payment, orderId, paypalLink } = useSelector((state: RootState) => state.bookings);
+
+  const linkToPaypal = () => {
+    if (radio === true) {
+      // dispatch(createPayPalOrder());
+
+    }
+
+  }
 
   return (
     // <SafeAreaView>
@@ -41,7 +55,7 @@ const PaymentScreen = ({ navigation, route }: any) => {
           <View style={styles.devide} />
           <View style={styles.row}>
             <Text style={styles.title}>Customer's name: </Text>
-            <Text style={styles.title}>{route.params.guestName}</Text>
+            <Text style={styles.title}>{route.params.username}</Text>
           </View>
           <View style={styles.row}>
             <Text style={styles.title}>Quanity of tickets: </Text>

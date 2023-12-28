@@ -1,4 +1,4 @@
-import { View, Text, StyleSheet, TextInput, TouchableOpacity } from 'react-native'
+import { View, Text, StyleSheet, TextInput, TouchableOpacity, ToastAndroid } from 'react-native'
 import React, { useState } from 'react'
 import { COLORS, FONTSIZE, SPACING } from '../theme/theme';
 import { RootState, useAppDispatch } from '../redux/store';
@@ -29,8 +29,15 @@ const LoginForm = (props: any) => {
     if (!isEmailValid || !isPasswordValid) {
       return;
     }
-    dispatch(loginUser({ email, password }));
-    navigation.goBack()
+    setTimeout(() => {
+      dispatch(loginUser({ email, password }));
+      ToastAndroid.showWithGravity(
+        'Login Success',
+        ToastAndroid.SHORT,
+        ToastAndroid.BOTTOM,
+      );
+      navigation.goBack()
+    }, 5000);
   }
 
   return (

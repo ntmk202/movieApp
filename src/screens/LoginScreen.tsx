@@ -39,7 +39,8 @@ const GuestLogin = ({ navigation, route }: any) => {
       guestNumber.length !== 0
     ){
       navigation.push('SeatBooking', {
-        guestName: guestFullname,
+        name: guestFullname,
+        fullname: guestFullname,
         email: guestEmail,
         phoneNumber: guestNumber,
         imageTicket: getIdMovie?.posterImage,

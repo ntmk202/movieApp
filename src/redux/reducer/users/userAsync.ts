@@ -61,8 +61,8 @@ export const registerUser = createAsyncThunk('register', async (body: User , thu
         signal: thunkAPI.signal,
         timeout: 3000
       })
-      console.log(response.data)
-      return response.data
+      // console.log(response.data.user)
+      return response.data.user
     } catch (error: any) {
       if (error.name === 'AxiosError' && error.response.status === 422) {
         return thunkAPI.rejectWithValue(error.response.data)

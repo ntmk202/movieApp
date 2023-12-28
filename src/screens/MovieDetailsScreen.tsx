@@ -27,16 +27,12 @@ import { RootState } from '../redux/store';
 
 const MovieDetailsScreen = ({ navigation }: any) => {
 
-  const { auth } = useSelector(
+  const { auth, dataLogin } = useSelector(
     (state: RootState) => state.user
   )
-
-  const authNavigation = auth ? 'SeatBooking' : 'Login';
-
   const { getIdMovie, loading, isSuccess, error } = useSelector(
     (state: RootState) => state.movies
   )
-
   if (
     getIdMovie == undefined &&
     getIdMovie == null
@@ -157,7 +153,14 @@ const MovieDetailsScreen = ({ navigation }: any) => {
         <TouchableOpacity
           style={styles.buttonBG}
           onPress={() => {
-            navigation.navigate(authNavigation);
+            auth? navigation.navigate("SeatBooking", {
+                imageTicket: getIdMovie?.posterImage,
+                idMovie: getIdMovie?.id,
+                titleMovie: getIdMovie?.title,
+                name: dataLogin?.fullname,
+                user: dataLogin?.fullname,
+              })
+            : navigation.navigate("Login");
           }}>
           <Text style={[styles.buttonText, { paddingHorizontal: 70 }]}>Buy Ticket</Text>
         </TouchableOpacity>

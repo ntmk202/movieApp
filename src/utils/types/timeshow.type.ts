@@ -23,6 +23,7 @@ interface Time {
 }
 
 interface Seat {
+    id: string,
     seatNo: string;
     is_available: boolean;
 }

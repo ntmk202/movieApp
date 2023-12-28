@@ -1,4 +1,4 @@
-import React, {useEffect, useState} from 'react';
+import React, { useEffect, useState } from 'react';
 import {
   Text,
   View,
@@ -26,6 +26,8 @@ import { RootState, useAppDispatch } from '../redux/store';
 import { useSelector } from 'react-redux';
 import { getAllTimeshows } from '../redux/reducer/timeshows/timeshowAsyncs';
 import { Showtime } from '../utils/types/timeshow.type';
+import { Booking } from '../utils/types/booking.type';
+import { addBookings } from '../redux/reducer/booking/bookingAsyncs';
 // import EncryptedStorage from 'react-native-encrypted-storage';
 
 const generateDate = () => {
@@ -44,10 +46,10 @@ const generateDate = () => {
     weekdays.push(formattedDate);
   }
   // console.log(weekdays)
-    return weekdays;
+  return weekdays;
 };
 
-const generateSeats = (timeshowList: Showtime[] ) => {
+const generateSeats = (timeshowList: Showtime[]) => {
   const numRow = 8;
   const numColumn = 8;
   const rowArray = [];
@@ -71,7 +73,7 @@ const generateSeats = (timeshowList: Showtime[] ) => {
         seatTaken.forEach((seat) => {
           const taken = seat.is_available;
           const number = seat.seatNo;
-          
+
           if (number === seatObject.number && taken) {
             seatObject.taken = true;
           }
@@ -86,9 +88,15 @@ const generateSeats = (timeshowList: Showtime[] ) => {
   return rowArray;
 };
 
-const SeatBookingScreen = ({navigation, route}: any) => {
-  const { timeshowList, loading, isSuccess, error } = useSelector(
+const SeatBookingScreen = ({ navigation, route }: any) => {
+  const { timeshowList } = useSelector(
     (state: RootState) => state.showtimes
+  )
+  const { bookingList } = useSelector(
+    (state: RootState) => state.bookings
+  )
+  const { auth } = useSelector(
+    (state: RootState) => state.user
   )
   const [dateArray, setDateArray] = useState<any[]>(generateDate());
   const [timeArray, setTimeArray] = useState<any>();
@@ -98,24 +106,47 @@ const SeatBookingScreen = ({navigation, route}: any) => {
   const [selectedTimeIndex, setSelectedTimeIndex] = useState<any>();
   const [selectedSeatArray, setSelectedSeatArray] = useState([]);
   const dispatch = useAppDispatch()
-
   useEffect(() => {
-    const promise = dispatch(getAllTimeshows({idMovie:route.params?.idMovie}));
+    const promise = dispatch(getAllTimeshows({ idMovie: route.params?.idMovie }));
     return () => {
       promise.abort
     }
   }, [dispatch]);
 
+  // const user = auth ? route.params.user : ''
+  // const fullname = auth ? '' : route.params.fullname
+  // const email = auth ? '' : route.params.email
+  // const number = auth ? '' : route.params.number
+  const tmsh = timeshowList.filter(data => data.showtime === dateArray[selectedDateIndex]?.showtime).map(data => data.available_seats);
+  const seatId = tmsh.flat().filter(s => selectedSeatArray.includes(s.seatNo)).map(ss => ss.id)
+  // console.log(route.params.fullname)
+  const initialState: Booking = {
+    // id: '',
+    user: route.params.user,
+    fullname: route.params.fullname,
+    email: route.params.email,
+    number: route.params.number,
+    titleMovie: route.params.titleMovie,
+    seat: seatId,
+    bookedAt: '',
+    totalPrice: price,
+    expiresIn: 210,
+    paypal_payment_id: '',
+    voucher: '',
+    snacks: '',
+    status: 'Pending'
+  }
+
   useEffect(() => {
     const filteredTimes = timeshowList
       .filter(data => data.showtime === dateArray[selectedDateIndex]?.showtime)
       .map(data => data.time);
-  
+
     setTimeArray(filteredTimes.flat());
   }, [selectedDateIndex, timeshowList, dateArray]);
 
   const selectSeat = (index: number, subindex: number, num: number) => {
-    if(dateArray[selectedDateIndex] !== undefined){
+    if (dateArray[selectedDateIndex] !== undefined) {
       if (!twoDSeatArray[index][subindex].taken) {
         let array: any = [...selectedSeatArray];
         let temp = [...twoDSeatArray];
@@ -133,7 +164,7 @@ const SeatBookingScreen = ({navigation, route}: any) => {
         setPrice(array.length * 5.0);
         setTwoDSeatArray(temp);
       }
-    }else{
+    } else {
       ToastAndroid.showWithGravity(
         'Please Select Date of the Show',
         ToastAndroid.SHORT,
@@ -148,17 +179,31 @@ const SeatBookingScreen = ({navigation, route}: any) => {
       timeArray[selectedTimeIndex] !== undefined &&
       dateArray[selectedDateIndex] !== undefined
     ) {
-      navigation.push('PaymentDetail', {
-        seatArray: selectedSeatArray,
-        time: timeArray[selectedTimeIndex],
-        date: dateArray[selectedDateIndex].showtime,
-        ticketImage: route.params.imageTicket,
-        price: price,
-        guestName: route.params.guestName,
-        email: route.params.email,
-        phoneNumber: route.params.phoneNumber,
-        titleMovie: route.params.titleMovie,
-      });
+      try {
+        await dispatch(addBookings(initialState)).unwrap()
+        console.log('success')
+      } catch (e: any) {
+        // console.log(e)
+        throw e
+      }
+      setTimeout(() => {
+        navigation.push('PaymentDetail', {
+          seatArray: selectedSeatArray,
+          time: timeArray[selectedTimeIndex],
+          date: dateArray[selectedDateIndex].showtime,
+          ticketImage: route.params.imageTicket,
+          price: price,
+          username: route.params.name,
+          titleMovie: route.params.titleMovie,
+        })
+
+      }, 5000);
+      ToastAndroid.showWithGravity(
+        'Please Waiting...',
+        ToastAndroid.SHORT,
+        ToastAndroid.BOTTOM,
+      );
+
     } else {
       ToastAndroid.showWithGravity(
         'Please Select Seats, Date and Time of the Show',
@@ -176,7 +221,7 @@ const SeatBookingScreen = ({navigation, route}: any) => {
       <StatusBar hidden />
       <View>
         <ImageBackground
-          source={{uri: route.params?.imageTicket}}
+          source={{ uri: route.params?.imageTicket }}
           style={styles.ImageBG}>
           <LinearGradient
             colors={[COLORS.BlackRGB10, COLORS.Black]}
@@ -198,7 +243,7 @@ const SeatBookingScreen = ({navigation, route}: any) => {
           {twoDSeatArray?.map((item, index) => {
             return (
               <View key={index} style={styles.seatRow}>
-                {item?.map((subitem: any | null , subindex: number) => {
+                {item?.map((subitem: any | null, subindex: number) => {
                   return (
                     <TouchableOpacity
                       key={subitem.number}
@@ -210,8 +255,8 @@ const SeatBookingScreen = ({navigation, route}: any) => {
                         source={require('~/assets/icons/arm-chair.png')}
                         style={[
                           styles.seatIcon,
-                          subitem.taken ? {tintColor: COLORS.Grey} : {},
-                          subitem.selected ? {tintColor: COLORS.Orange} : {},
+                          subitem.taken ? { tintColor: COLORS.Grey } : {},
+                          subitem.selected ? { tintColor: COLORS.Orange } : {},
                         ]}
                       />
                     </TouchableOpacity>
@@ -229,14 +274,14 @@ const SeatBookingScreen = ({navigation, route}: any) => {
           <View style={styles.radioContainer}>
             <Image
               source={require('~/assets/icons/radio.png')}
-              style={[styles.radioIcon, {tintColor: COLORS.Grey}]}
+              style={[styles.radioIcon, { tintColor: COLORS.Grey }]}
             />
             <Text style={styles.radioText}>Taken</Text>
           </View>
           <View style={styles.radioContainer}>
             <Image
               source={require('~/assets/icons/radio.png')}
-              style={[styles.radioIcon, {tintColor: COLORS.Orange}]}
+              style={[styles.radioIcon, { tintColor: COLORS.Orange }]}
             />
             <Text style={styles.radioText}>Selected</Text>
           </View>
@@ -250,19 +295,19 @@ const SeatBookingScreen = ({navigation, route}: any) => {
           horizontal
           bounces={false}
           contentContainerStyle={styles.containerGap24}
-          renderItem={({item, index}) => {
+          renderItem={({ item, index }) => {
             return (
               <TouchableOpacity onPress={() => setSelectedDateIndex(index)}>
                 <View
                   style={[
                     styles.dateContainer,
                     index == 0
-                      ? {marginLeft: SPACING.space_24}
+                      ? { marginLeft: SPACING.space_24 }
                       : index == dateArray.length - 1
-                      ? {marginRight: SPACING.space_24}
-                      : {},
+                        ? { marginRight: SPACING.space_24 }
+                        : {},
                     index == selectedDateIndex
-                      ? {backgroundColor: COLORS.Orange}
+                      ? { backgroundColor: COLORS.Orange }
                       : {},
                   ]}>
                   <Text style={styles.dateText}>{item.date}</Text>
@@ -281,11 +326,11 @@ const SeatBookingScreen = ({navigation, route}: any) => {
           horizontal
           bounces={false}
           contentContainerStyle={styles.containerGap24}
-          renderItem={({item, index}) => {
+          renderItem={({ item, index }) => {
             return (
               !item.starttime ? (
-                <View style={{backgroundColor:'red',alignItems: "center", justifyContent: "center", height: 20, width: 100}}> 
-                  <Text style={styles.timeText}> No showtimes </Text> 
+                <View style={{ backgroundColor: 'red', alignItems: "center", justifyContent: "center", height: 20, width: 100 }}>
+                  <Text style={styles.timeText}> No showtimes </Text>
                 </View>
               ) : (
                 <TouchableOpacity onPress={() => setSelectedTimeIndex(index)}>
@@ -295,8 +340,8 @@ const SeatBookingScreen = ({navigation, route}: any) => {
                       index == 0
                         ? { marginLeft: SPACING.space_24 }
                         : index == dateArray.length - 1
-                        ? { marginRight: SPACING.space_24 }
-                        : {},
+                          ? { marginRight: SPACING.space_24 }
+                          : {},
                       index == selectedTimeIndex
                         ? { backgroundColor: COLORS.Orange }
                         : {},
@@ -307,7 +352,7 @@ const SeatBookingScreen = ({navigation, route}: any) => {
               )
             );
           }}
-        /> 
+        />
       </View>
 
       <View style={styles.buttonPriceContainer}>

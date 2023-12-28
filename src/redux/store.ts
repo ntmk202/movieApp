@@ -27,6 +27,7 @@ import timeshowReducer from './reducer/timeshows/timeshow.slice';
 import userReducer from './reducer/users/userSlice';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { persistReducer, persistStore } from 'redux-persist';
+import bookingReducer from './reducer/booking/booking.slice';
 
 
 const userPersistConfig = {
@@ -43,6 +44,7 @@ export const store = configureStore({
     user: persistedUserReducer,
     movies: movieReducer,
     showtimes: timeshowReducer,
+    bookings: bookingReducer,
   },
   middleware: (getDefaultMiddleware) => getDefaultMiddleware({
     immutableCheck: false,

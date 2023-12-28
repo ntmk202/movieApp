@@ -182,7 +182,7 @@ const HomeScreen = ({ navigation }: any) => {
             <SubMovieCard
               shoudlMarginatedAtEnd={true}
               cardFunction={() => {
-                navigation.push('MovieDetails', { movieid: item.id });
+                navigation.push('MovieDetails', { movieId: item.id });
               }}
               cardWidth={width / 3}
               isFirst={index == 0 ? true : false}
@@ -204,7 +204,7 @@ const HomeScreen = ({ navigation }: any) => {
             <SubMovieCard
               shoudlMarginatedAtEnd={true}
               cardFunction={() => {
-                navigation.push('MovieDetails', { movieid: item.id });
+                navigation.push('MovieDetails', { movieId: item.id });
               }}
               cardWidth={width / 3}
               isFirst={index == 0 ? true : false}
