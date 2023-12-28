@@ -5,20 +5,34 @@ import AppHeader from '../components/AppHeader';
 import SettingComponent from '../components/SettingComponent';
 import { LinearGradient } from 'expo-linear-gradient';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { useNavigation } from '@react-navigation/native';
+import { useIsFocused, useNavigation } from '@react-navigation/native';
 import { setToken } from '../redux/reducer/users/userSlice'; // Import the setToken action
-import { useDispatch } from 'react-redux';
-import { useEffect } from 'react';
+import { useDispatch, useSelector } from 'react-redux';
+import { useEffect, useState } from 'react';
 import { CommonActions } from '@react-navigation/native'; // Import CommonActions
-import { logOutUser } from '../redux/reducer/users/userAsync';
-import { useAppDispatch } from '../redux/store';
+import { getInforUser, logOutUser } from '../redux/reducer/users/userAsync';
+import { RootState, useAppDispatch } from '../redux/store';
 
 // import close from '~/assets/icons/close.png'
 
 const UserAccountScreen = ({ navigation }: any) => {
 
-  const dispatch = useAppDispatch()
+  const { dataUser, fullname } = useSelector(
+    (state: RootState) => state.user
+  )
 
+  const dispatch = useAppDispatch()
+  const isFocused = useIsFocused();
+  
+  useEffect(() => {
+    if (isFocused && fullname) {
+      dispatch(getInforUser(fullname))
+    }
+  }, [isFocused, fullname]);
+
+
+  const currentUser = Array.isArray(dataUser) ? dataUser[0] : dataUser;
+  
   const logOut = async () => {
     dispatch(logOutUser())
     navigation.dispatch(
@@ -48,10 +62,10 @@ const UserAccountScreen = ({ navigation }: any) => {
         <ScrollView showsVerticalScrollIndicator={false}>
           <View style={styles.profileContainer}>
             <Image
-              source={require('~/assets/image/avatar.png')}
+              source={require('~/assets/image/account.png')}
               style={styles.avatarImage}
             />
-            <Text style={styles.avatarText}>John Doe</Text>
+            <Text style={styles.avatarText}>{currentUser?.fullname}</Text>
           </View>
 
           <View style={styles.profileContainer}>

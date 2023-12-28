@@ -5,72 +5,143 @@ import axios from 'axios';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
 
-// export const registerUser = createAsyncThunk('user/register', async (data: User) => {
-//   const response = await fetch('https://movie-api-service-lxyr.onrender.com/api/register/', {
-//     method: 'POST',
-//     headers: {
-//       'Content-Type': 'application/json',
-//     },
-//     body: JSON.stringify(data),
-//   });
+export const registerUser = createAsyncThunk('register', async (body: User, thunkAPI) => {
+  try {
+    const response = await http.post<User>('register/', body, {
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      signal: thunkAPI.signal,
+      timeout: 3000
+    })
 
-//   if (!response.ok) {
-//     console.log(response.json())
-//     throw new Error('Registration failed');
-//   }
+    return response.data
+  } catch (error: any) {
+    if (error.name === 'AxiosError' && error.response.status === 422) {
+      return thunkAPI.rejectWithValue(error.response.data)
+    }
+    throw error
+  }
+})
 
-//   return await response.json();
-// });
+export const loginUser = createAsyncThunk('login', async (body: LoginUser, thunkAPI) => {
+  try {
+    const response = await http.post<LoginUser>('login/', body, {
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      signal: thunkAPI.signal,
+      timeout: 3000
+    })
+    return response.data
+  } catch (error: any) {
+    if (error.name === 'AxiosError' && error.response.status === 422) {
+      return thunkAPI.rejectWithValue(error.response.data)
+    }
+    throw error
+  }
+})
 
-// export const registerUser = createAsyncThunk('user/register', async (body:User) => {
+
+// export const getInforUser = createAsyncThunk(
+//   'getUserProfile',
+//   async (fullname: string, thunkAPI) => {
 //     try {
-//       const response = await axios.post('https://movie-api-service-lxyr.onrender.com/api/register/', body);
-//       return response.data; // Assuming the response contains user data
-//     } catch (error) {
-//         console.log(error)
+//       const rawData = await AsyncStorage.getItem('persist:user');
+//       if (rawData === null || typeof rawData !== 'string') {
+//         throw new Error();
+//       }
+//       const parsedData = JSON.parse(rawData);
+//       // const token = parsedData.token;
+//       const token = parsedData.token.replace(/^"(.*)"$/, '$1');
+//       console.log(token)
+
+//       const response = await http.get<User>(`/users/profile/${fullname}`, {
+//         headers: {
+//           'Content-Type': 'application/json',
+//           Authorization: `Token ${token}`,
+//         },
+//         signal: thunkAPI.signal,
+//         timeout: 3000,
+//       });
+
+//       return response.data;
+//     } catch (error: any) {
+//       console.log(error.response.data)
 //       throw error;
 //     }
-//   });
+//   }
+// );
 
-export const registerUser = createAsyncThunk('register', async (body: User , thunkAPI) => {
+export const getInforUser = createAsyncThunk('user/fetchUserProfile', async (fullname: string, thunkAPI) => {
+  try {
+    const rawData = await AsyncStorage.getItem('persist:user');
+    if (rawData === null || typeof rawData !== 'string') {
+      throw new Error();
+    }
+    const parsedData = JSON.parse(rawData);
+
+    const token = parsedData.token.replace(/^"(.*)"$/, '$1');
+    const response = await fetch(`https://movie-api-service-lxyr.onrender.com/api/users/profile/${fullname}/`, {
+      method: 'GET',
+      headers: {
+        'Authorization': `Token ${token}`,
+        'Content-Type': 'application/json',
+      },
+    });
+
+    if (!response.ok) {
+      throw new Error('Failed to fetch user profile');
+    }
+
+    const data = await response.json();
+    return data;
+
+  } catch (error: any) {
+    console.log(error.response.data)
+  }
+});
+
+export const updateInforUser = createAsyncThunk(
+  'user/updateUserProfile',
+  async (userData: User, thunkAPI) => {
     try {
-      const response = await http.post<User>('register/', body, {
+      const rawData = await AsyncStorage.getItem('persist:user');
+      if (rawData === null || typeof rawData !== 'string') {
+        throw new Error();
+      }
+      const parsedData = JSON.parse(rawData);
+
+
+      const token = parsedData.token.replace(/^"(.*)"$/, '$1');
+      const response = await fetch(`https://movie-api-service-lxyr.onrender.com/api/users/profile/${userData.fullname}/`, {
+        method: 'PUT',
         headers: {
-            'Content-Type': 'application/json',
-          },
-        signal: thunkAPI.signal,
-        timeout: 3000
-      })
-      console.log(response.status)
-      return response.data
+          'Authorization': `Token ${token}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(userData),
+      });
+
+    
+      if (!response.ok) {
+        throw new Error('Failed to update user profile');
+      }
+      const updatedData = await response.json();
+
+
+      return updatedData;
     } catch (error: any) {
+      console.log(error)
       if (error.name === 'AxiosError' && error.response.status === 422) {
         return thunkAPI.rejectWithValue(error.response.data)
       }
-    //   console.log(error.response.data)
-      throw error
+      throw error 
     }
-  })
+  }
+);
 
-  export const loginUser = createAsyncThunk('login', async (body: LoginUser , thunkAPI) => {
-    try {
-      const response = await http.post<LoginUser>('login/', body, {
-        headers: {
-            'Content-Type': 'application/json',
-          },
-        signal: thunkAPI.signal,
-        timeout: 3000
-      })
-      console.log(response.data)
-      return response.data
-    } catch (error: any) {
-      if (error.name === 'AxiosError' && error.response.status === 422) {
-        return thunkAPI.rejectWithValue(error.response.data)
-      }
-      throw error
-    }
-  })
+export const logOutUser = createAsyncThunk('logout', async (thunkAPI) => {
+  await AsyncStorage.clear();
+});
 
-  export const logOutUser = createAsyncThunk('logout', async (thunkAPI) => {
-    await AsyncStorage.clear();
-  });
