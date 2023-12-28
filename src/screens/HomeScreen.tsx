@@ -62,9 +62,6 @@ const HomeScreen = ({ navigation }: any) => {
   const { movieList, loading, isSuccess, error } = useSelector(
     (state: RootState) => state.movies
   )
-  // console.log(movieList)
-
-  const [nowPlayingMoviesList, setNowPlayingMoviesList] = useState<any>(undefined);
   const [popularMoviesList, setPopularMoviesList] = useState<any>(undefined);
   const [upcomingMoviesList, setUpcomingMoviesList] = useState<any>(undefined);
 
@@ -88,6 +85,7 @@ const HomeScreen = ({ navigation }: any) => {
       promise.abort
     }
   }, [dispatch]);
+  
 
   const searchMoviesFunction = () => {
     navigation.navigate('Search');

@@ -1,4 +1,4 @@
-import React, {useState} from 'react';
+import React, {useEffect, useState} from 'react';
 import {
   Text,
   View,
@@ -22,36 +22,35 @@ import {
 import AppHeader from '../components/AppHeader';
 import CustomIcon from '../components/CustomIcon';
 import { LinearGradient } from 'expo-linear-gradient';
+import { RootState, useAppDispatch } from '../redux/store';
+import { useSelector } from 'react-redux';
+import { getAllTimeshows } from '../redux/reducer/timeshows/timeshowAsyncs';
+import { Showtime } from '../utils/types/timeshow.type';
 // import EncryptedStorage from 'react-native-encrypted-storage';
-
-const timeArray: string[] = [
-  '10:30',
-  '12:30',
-  '14:30',
-  '15:00',
-  '19:30',
-  '21:00',
-];
 
 const generateDate = () => {
   const date = new Date();
   let weekday = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
   let weekdays = [];
   for (let i = 0; i < 7; i++) {
-    let tempDate = {
-      date: new Date(date.getTime() + i * 24 * 60 * 60 * 1000).getDate(),
-      day: weekday[new Date(date.getTime() + i * 24 * 60 * 60 * 1000).getDay()],
+    let tempDate = new Date(date.getTime() + i * 24 * 60 * 60 * 1000);
+    let formattedDate = {
+      year: tempDate.getFullYear(),
+      month: tempDate.getMonth() + 1,
+      date: tempDate.getDate(),
+      day: weekday[tempDate.getDay()],
+      showtime: `${tempDate.getFullYear()}-${(tempDate.getMonth() + 1).toString().padStart(2, '0')}-${tempDate.getDate().toString().padStart(2, '0')}`,
     };
-    weekdays.push(tempDate);
+    weekdays.push(formattedDate);
   }
-  return weekdays;
+  // console.log(weekdays)
+    return weekdays;
 };
 
-const generateSeats = () => {
+const generateSeats = (timeshowList: Showtime[] ) => {
   const numRow = 8;
   const numColumn = 8;
   const rowArray = [];
-  const start = 1;
 
   const colLabels = Array.from({ length: numColumn }, (_, index) => (index + 1).toString());
   const maxNumCol = Math.max(...colLabels.map(Number)); // Get the maximum number of columns
@@ -65,39 +64,81 @@ const generateSeats = () => {
         taken: false,
         selected: false,
       };
+
+      // Check if the seat is taken based on timeshowList data
+      timeshowList.forEach((data) => {
+        const seatTaken = data.available_seats;
+        seatTaken.forEach((seat) => {
+          const taken = seat.is_available;
+          const number = seat.seatNo;
+          
+          if (number === seatObject.number && taken) {
+            seatObject.taken = true;
+          }
+        });
+      });
+
       columnArray.push(seatObject);
     }
     rowArray.push(columnArray);
-    console.log(rowArray,columnArray)
   }
+
   return rowArray;
 };
 
 const SeatBookingScreen = ({navigation, route}: any) => {
+  const { timeshowList, loading, isSuccess, error } = useSelector(
+    (state: RootState) => state.showtimes
+  )
   const [dateArray, setDateArray] = useState<any[]>(generateDate());
+  const [timeArray, setTimeArray] = useState<any>();
   const [selectedDateIndex, setSelectedDateIndex] = useState<any>();
   const [price, setPrice] = useState<number>(0);
-  const [twoDSeatArray, setTwoDSeatArray] = useState<any[number][]>(generateSeats());
-  const [selectedSeatArray, setSelectedSeatArray] = useState([]);
+  const [twoDSeatArray, setTwoDSeatArray] = useState<any[string][]>(generateSeats(timeshowList));
   const [selectedTimeIndex, setSelectedTimeIndex] = useState<any>();
+  const [selectedSeatArray, setSelectedSeatArray] = useState([]);
+  const dispatch = useAppDispatch()
+
+  useEffect(() => {
+    const promise = dispatch(getAllTimeshows({idMovie:route.params?.idMovie}));
+    return () => {
+      promise.abort
+    }
+  }, [dispatch]);
+
+  useEffect(() => {
+    const filteredTimes = timeshowList
+      .filter(data => data.showtime === dateArray[selectedDateIndex]?.showtime)
+      .map(data => data.time);
+  
+    setTimeArray(filteredTimes.flat());
+  }, [selectedDateIndex, timeshowList, dateArray]);
 
   const selectSeat = (index: number, subindex: number, num: number) => {
-    if (!twoDSeatArray[index][subindex].taken) {
-      let array: any = [...selectedSeatArray];
-      let temp = [...twoDSeatArray];
-      temp[index][subindex].selected = !temp[index][subindex].selected;
-      if (!array.includes(num)) {
-        array.push(num);
-        setSelectedSeatArray(array);
-      } else {
-        const tempindex = array.indexOf(num);
-        if (tempindex > -1) {
-          array.splice(tempindex, 1);
+    if(dateArray[selectedDateIndex] !== undefined){
+      if (!twoDSeatArray[index][subindex].taken) {
+        let array: any = [...selectedSeatArray];
+        let temp = [...twoDSeatArray];
+        temp[index][subindex].selected = !temp[index][subindex].selected;
+        if (!array.includes(num)) {
+          array.push(num);
           setSelectedSeatArray(array);
+        } else {
+          const tempindex = array.indexOf(num);
+          if (tempindex > -1) {
+            array.splice(tempindex, 1);
+            setSelectedSeatArray(array);
+          }
         }
+        setPrice(array.length * 5.0);
+        setTwoDSeatArray(temp);
       }
-      setPrice(array.length * 5.0);
-      setTwoDSeatArray(temp);
+    }else{
+      ToastAndroid.showWithGravity(
+        'Please Select Date of the Show',
+        ToastAndroid.SHORT,
+        ToastAndroid.BOTTOM,
+      );
     }
   };
 
@@ -107,27 +148,16 @@ const SeatBookingScreen = ({navigation, route}: any) => {
       timeArray[selectedTimeIndex] !== undefined &&
       dateArray[selectedDateIndex] !== undefined
     ) {
-      // try {
-      //   await EncryptedStorage.setItem(
-      //     'ticket',
-      //     JSON.stringify({
-      //       seatArray: selectedSeatArray,
-      //       time: timeArray[selectedTimeIndex],
-      //       date: dateArray[selectedDateIndex],
-      //       ticketImage: route.params.PosterImage,
-      //     }),
-      //   );
-      // } catch (error) {
-      //   console.error(
-      //     'Something went Wrong while storing in BookSeats Functions',
-      //     error,
-      //   );
-      // }
-      navigation.navigate('PaymentDetail', {
+      navigation.push('PaymentDetail', {
         seatArray: selectedSeatArray,
         time: timeArray[selectedTimeIndex],
-        date: dateArray[selectedDateIndex],
+        date: dateArray[selectedDateIndex].showtime,
         ticketImage: route.params.imageTicket,
+        price: price,
+        guestName: route.params.guestName,
+        email: route.params.email,
+        phoneNumber: route.params.phoneNumber,
+        titleMovie: route.params.titleMovie,
       });
     } else {
       ToastAndroid.showWithGravity(
@@ -247,31 +277,37 @@ const SeatBookingScreen = ({navigation, route}: any) => {
       <View style={styles.OutterContainer}>
         <FlatList
           data={timeArray}
-          keyExtractor={item => item}
+          keyExtractor={item => item.starttime}
           horizontal
           bounces={false}
           contentContainerStyle={styles.containerGap24}
           renderItem={({item, index}) => {
             return (
-              <TouchableOpacity onPress={() => setSelectedTimeIndex(index)}>
-                <View
-                  style={[
-                    styles.timeContainer,
-                    index == 0
-                      ? {marginLeft: SPACING.space_24}
-                      : index == dateArray.length - 1
-                      ? {marginRight: SPACING.space_24}
-                      : {},
-                    index == selectedTimeIndex
-                      ? {backgroundColor: COLORS.Orange}
-                      : {},
-                  ]}>
-                  <Text style={styles.timeText}>{item}</Text>
+              !item.starttime ? (
+                <View style={{backgroundColor:'red',alignItems: "center", justifyContent: "center", height: 20, width: 100}}> 
+                  <Text style={styles.timeText}> No showtimes </Text> 
                 </View>
-              </TouchableOpacity>
+              ) : (
+                <TouchableOpacity onPress={() => setSelectedTimeIndex(index)}>
+                  <View
+                    style={[
+                      styles.timeContainer,
+                      index == 0
+                        ? { marginLeft: SPACING.space_24 }
+                        : index == dateArray.length - 1
+                        ? { marginRight: SPACING.space_24 }
+                        : {},
+                      index == selectedTimeIndex
+                        ? { backgroundColor: COLORS.Orange }
+                        : {},
+                    ]}>
+                    <Text style={styles.timeText}>{item.starttime}</Text>
+                  </View>
+                </TouchableOpacity>
+              )
             );
           }}
-        />
+        /> 
       </View>
 
       <View style={styles.buttonPriceContainer}>

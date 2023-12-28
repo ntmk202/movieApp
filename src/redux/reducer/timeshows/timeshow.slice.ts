@@ -2,13 +2,6 @@ import { AsyncThunk, createSlice, PayloadAction } from '@reduxjs/toolkit';
 import { Showtime } from '~/src/utils/types/timeshow.type';
 import { getAllTimeshows } from './timeshowAsyncs';
 
-type GenericAsyncThunk = AsyncThunk<unknown, unknown, any>
-
-type PendingAction = ReturnType<GenericAsyncThunk['pending']>
-type RejectedAction = ReturnType<GenericAsyncThunk['rejected']>
-type FulfilledAction = ReturnType<GenericAsyncThunk['fulfilled']>
-
-
 interface TimeshowState {
   timeshowList: Showtime[];
   isSuccess: boolean;
