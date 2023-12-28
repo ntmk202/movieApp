@@ -43,7 +43,8 @@ const GuestLogin = ({ navigation, route }: any) => {
         email: guestEmail,
         phoneNumber: guestNumber,
         imageTicket: getIdMovie?.posterImage,
-        idMovie: getIdMovie?.id
+        idMovie: getIdMovie?.id,
+        titleMovie: getIdMovie?.title
       });
     } else {
       ToastAndroid.showWithGravity(

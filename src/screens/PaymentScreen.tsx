@@ -5,9 +5,11 @@ import AppHeader from '../components/AppHeader'
 import { COLORS, FONTSIZE, SPACING } from '../theme/theme'
 import { LinearGradient } from 'expo-linear-gradient'
 
-const PaymentScreen = ({ navigation }: any) => {
+const PaymentScreen = ({ navigation, route }: any) => {
 
   const [radio, setRadio] = useState(true)
+  const voucher = 0
+  const seat = route.params.seatArray.join(', ')
   const handleRadioPress = () => {
     setRadio(!radio); // Toggle the state of the radio button
   };
@@ -17,19 +19,19 @@ const PaymentScreen = ({ navigation }: any) => {
       <LinearGradient style={{ flex: 1 }} colors={[COLORS.DarkGrey, COLORS.Orange, COLORS.DarkGrey]}>
         <View style={styles.appHeaderContainer}>
           <AppHeader
-            name={require('~/assets/icons/left-arrow.png')}
+            name={require('~/assets/icons/close.png')}
             header={'Payment Details'}
-            action={() => navigation.goBack()}
+            action={() => navigation.navigate("MovieDetails")}
           />
         </View>
         <View style={styles.container}>
           <View style={styles.row}>
             <Text style={styles.title}>Movie title: </Text>
-            <Text style={styles.title}>Killers of the Flower Moon</Text>
+            <Text style={styles.title}>{route.params.titleMovie}</Text>
           </View>
           <View style={styles.row}>
             <Text style={styles.title}>show times: </Text>
-            <Text style={styles.title}>19:30pm - 21:30pm</Text>
+            <Text style={styles.title}>{route.params.time.starttime} - {route.params.time.endtime}</Text>
           </View>
           <View style={styles.row}>
             <Text style={styles.title}>theater: </Text>
@@ -39,25 +41,25 @@ const PaymentScreen = ({ navigation }: any) => {
           <View style={styles.devide} />
           <View style={styles.row}>
             <Text style={styles.title}>Customer's name: </Text>
-            <Text style={styles.title}>Chalee</Text>
+            <Text style={styles.title}>{route.params.guestName}</Text>
           </View>
           <View style={styles.row}>
             <Text style={styles.title}>Quanity of tickets: </Text>
-            <Text style={styles.title}>Seat: f2</Text>
+            <Text style={styles.title}>Seat: {seat}</Text>
           </View>
           <View style={styles.row}>
             <Text style={styles.title}>fees: </Text>
-            <Text style={[styles.title,{color: COLORS.Yellow, fontWeight:'600'}]}>$8.00</Text>
+            <Text style={[styles.title,{color: COLORS.Yellow, fontWeight:'600'}]}>${route.params.price}</Text>
           </View>
 
           <View style={styles.devide} />
           <View style={styles.row}>
             <Text style={styles.title}>Voucher: </Text>
-            <Text style={styles.title}>ddsfhfuhukfhnjkb</Text>
+            <Text style={styles.title}>${voucher}</Text>
           </View>
           <View style={styles.row}>
             <Text style={styles.title}>Total: </Text>
-            <Text style={[styles.title,{color: 'lightgreen', fontWeight:'600'}]}>$8.00</Text>
+            <Text style={[styles.title,{color: 'lightgreen', fontWeight:'600'}]}>${route.params.price - voucher}</Text>
           </View>
         </View>
         <View style={styles.container}>
