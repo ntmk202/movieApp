@@ -79,7 +79,7 @@ const LoginScreen = ({ navigation, route }: any) => {
         tabBarLabelStyle: { color: COLORS.White },
         tabBarIndicatorStyle: { backgroundColor: COLORS.Orange }
       }}>
-        <TopTab.Screen name="Menber" component={MemberLogin} />
+        <TopTab.Screen name="Member" component={MemberLogin} />
         <TopTab.Screen name="Guest" component={GuestLogin} />
       </TopTab.Navigator>
     </SafeAreaView>

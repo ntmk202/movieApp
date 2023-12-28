@@ -1,43 +1,74 @@
-import { View, Text, StyleSheet, TextInput, Button, TouchableOpacity } from 'react-native'
-import React from 'react'
+import { View, Text, StyleSheet, TextInput, TouchableOpacity } from 'react-native'
+import React, { useState } from 'react'
 import { COLORS, FONTSIZE, SPACING } from '../theme/theme';
+import { RootState, useAppDispatch } from '../redux/store';
+import { loginUser } from '../redux/reducer/users/userAsync';
+import { useNavigation, NavigationProp } from '@react-navigation/native';
+import { useSelector } from 'react-redux';
+import { validateEmail, validatePassword } from '../utils/validates/validates';
 
 const LoginForm = (props: any) => {
 
-  const LoginAction = () => {
-    // navigation.navigate('Register');
-    console.log(3)
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [emailError, setEmailError] = useState('');
+  const [passwordError, setPasswordError] = useState('');
+
+  const { auth, token } = useSelector((state: RootState) => state.user)
+
+  const dispatch = useAppDispatch()
+  const navigation = useNavigation<any>()
+
+  const LoginAction = async () => {
+
+    const isEmailValid = validateEmail(email);
+    const isPasswordValid = validatePassword(password);
+
+    setEmailError(isEmailValid ? '' : 'Invalid email format or empty !');
+    setPasswordError(isPasswordValid ? '' : 'Password must be at least 6 characters !');
+    if (!isEmailValid || !isPasswordValid) {
+      return;
+    }
+    dispatch(loginUser({ email, password }));
+    navigation.goBack()
   }
 
   return (
+
     <View style={styles.container}>
-      <TextInput 
-        style = {styles.textInput}
-        returnKeyType="next" 
+      <TextInput
+        style={styles.textInput}
+        returnKeyType="next"
         placeholder="Email"
         placeholderTextColor={COLORS.WhiteRGBA32}
-        // value='Email' 
-        autoCapitalize='none' 
-        autoComplete='email' 
-        textContentType='emailAddress' 
-        keyboardType='email-address' 
+        value={email}
+        onChangeText={(text) => setEmail(text)}
+        autoCapitalize='none'
+        autoComplete='email'
+        textContentType='emailAddress'
+        keyboardType='email-address'
+        onBlur={() => validateEmail(email)}
       />
-      <TextInput 
-        style = {styles.textInput}
-        returnKeyType="done" 
+      {emailError ? <Text style={styles.errorText}>{emailError}</Text> : null}
+      <TextInput
+        style={styles.textInput}
+        returnKeyType="done"
         placeholder="Password"
         placeholderTextColor={COLORS.WhiteRGBA32}
-        // value='Email' 
-        autoCapitalize='none' 
+        value={password}
+        onChangeText={(text) => setPassword(text)}
+        autoCapitalize='none'
         secureTextEntry
+        onBlur={() => validatePassword(password)}
       />
-      <TouchableOpacity style={styles.btn} onPress={props.LoginAction} >
-        <Text style={{color: COLORS.White, fontSize: FONTSIZE.size_18, fontWeight: '600' }}>Sign In</Text>
+      {passwordError ? <Text style={styles.errorText}>{passwordError}</Text> : null}
+      <TouchableOpacity style={styles.btn} onPress={LoginAction} >
+        <Text style={{ color: COLORS.White, fontSize: FONTSIZE.size_18, fontWeight: '600' }}>Sign In</Text>
       </TouchableOpacity>
-      <View style={{flexDirection: 'row', marginTop: 10}}>
-        <Text style={{color: COLORS.WhiteRGBA50, marginEnd: 5}}>Don't have Account?</Text>
-        <TouchableOpacity onPress={props.rejectRegister}> 
-          <Text style={{color: COLORS.Orange}}>Sign up here</Text> 
+      <View style={{ flexDirection: 'row', marginTop: 10 }}>
+        <Text style={{ color: COLORS.WhiteRGBA50, marginEnd: 5 }}>Don't have Account?</Text>
+        <TouchableOpacity onPress={props.rejectRegister}>
+          <Text style={{ color: COLORS.Orange }}>Sign up here</Text>
         </TouchableOpacity>
       </View>
     </View>
@@ -60,19 +91,24 @@ const styles = StyleSheet.create({
     borderColor: COLORS.Orange,
     borderWidth: 1
   },
-  btn:{
+  btn: {
     backgroundColor: COLORS.Orange,
     padding: 10,
     justifyContent: "center",
     alignItems: "center",
     borderRadius: 10,
-    shadowOffset: {width: -2, height: 2},
+    shadowOffset: { width: -2, height: 2 },
     shadowOpacity: 0.9,
     elevation: 10,
     shadowRadius: 10,
     shadowColor: "#000",
     marginVertical: 10
-  }
+  },
+  errorText: {
+    color: COLORS.Orange,
+    marginTop: 2,
+    marginBottom: 2
+  },
 });
 
 export default LoginForm
